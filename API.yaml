@@ -1,0 +1,306 @@
+openapi: 3.0.3
+info:
+  title: URL Shortner API
+  version: "1.0.0"
+  description: |
+    Backend URL shortening service.
+
+    - Method-level docs and this OpenAPI description were generated automatically by AI.
+    - Base URL is configurable via `app.base.url` (defaults to `http://localhost:8080`).
+servers:
+  - url: http://localhost:8080
+paths:
+  /api/v1/shortenUrl:
+    post:
+      summary: Create or reuse a short URL
+      description: Creates (or reuses) a short URL for a full URL with an optional alias.
+      tags: [Shortening]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestUrl'
+      responses:
+        "200":
+          description: Short URL successfully created or reused.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type: string
+                    description: Full short URL (including base, encoded id and optional alias).
+        "400":
+          $ref: '#/components/responses/BadRequestError'
+  /api/v1/data:
+    post:
+      summary: Get short URL metadata
+      description: Returns metadata for an existing short URL id (and optional alias).
+      tags: [Shortening]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestShortUrl'
+      responses:
+        "200":
+          description: Metadata for the requested short URL.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseUrl'
+        "400":
+          $ref: '#/components/responses/BadRequestError'
+        "404":
+          $ref: '#/components/responses/NotFoundError'
+        "410":
+          $ref: '#/components/responses/GoneError'
+  "/{id}":
+    get:
+      summary: Redirect to full URL (no alias)
+      description: Resolves a short URL and redirects the client to the stored full URL.
+      tags: [Redirect]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: Base64-url encoded id of the stored short URL.
+      responses:
+        "307":
+          description: Temporary redirect to the target URL.
+          headers:
+            Location:
+              description: Target full URL.
+              schema:
+                type: string
+        "400":
+          $ref: '#/components/responses/BadRequestError'
+        "404":
+          $ref: '#/components/responses/NotFoundError'
+        "410":
+          $ref: '#/components/responses/GoneError'
+  "/{id}/{alias}":
+    get:
+      summary: Redirect to full URL (with alias)
+      description: Resolves a short URL and redirects the client to the stored full URL using an alias.
+      tags: [Redirect]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: Base64-url encoded id of the stored short URL.
+        - in: path
+          name: alias
+          required: true
+          schema:
+            type: string
+          description: Alias that must match the stored alias (if present).
+      responses:
+        "307":
+          description: Temporary redirect to the target URL.
+          headers:
+            Location:
+              description: Target full URL.
+              schema:
+                type: string
+        "400":
+          $ref: '#/components/responses/BadRequestError'
+        "404":
+          $ref: '#/components/responses/NotFoundError'
+        "410":
+          $ref: '#/components/responses/GoneError'
+    delete:
+      summary: Delete short URL (with alias)
+      description: Deletes the stored short URL record using encoded id and alias.
+      tags: [Management]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: alias
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Short URL successfully deleted.
+        "400":
+          $ref: '#/components/responses/BadRequestError'
+        "404":
+          $ref: '#/components/responses/NotFoundError'
+        "410":
+          $ref: '#/components/responses/GoneError'
+  "/{id}":
+    delete:
+      summary: Delete short URL (no alias)
+      description: Deletes the stored short URL record using only encoded id.
+      tags: [Management]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Short URL successfully deleted.
+        "400":
+          $ref: '#/components/responses/BadRequestError'
+        "404":
+          $ref: '#/components/responses/NotFoundError'
+        "410":
+          $ref: '#/components/responses/GoneError'
+  /api/v1/stats/totalRequestCount:
+    get:
+      summary: Get total request count
+      description: Returns the total number of requests that hit any UrlController endpoint.
+      tags: [Stats]
+      responses:
+        "200":
+          description: Total request count.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalRequestCount:
+                    type: integer
+                    format: int64
+  /api/v1/stats/requestCount:
+    get:
+      summary: Get per short URL request count
+      description: Returns the persisted per-URL request count for a specific short URL.
+      tags: [Stats]
+      parameters:
+        - in: query
+          name: url_id
+          required: true
+          schema:
+            type: string
+          description: Encoded id.
+        - in: query
+          name: alias
+          required: false
+          schema:
+            type: string
+          description: Optional alias.
+      responses:
+        "200":
+          description: Per-short-URL request count.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  requestCount:
+                    type: integer
+        "400":
+          $ref: '#/components/responses/BadRequestError'
+        "404":
+          $ref: '#/components/responses/NotFoundError'
+        "410":
+          $ref: '#/components/responses/GoneError'
+  /api/v1/stats/redirectCount:
+    get:
+      summary: Get total redirect count
+      description: Returns the total number of redirects performed by the redirect endpoint.
+      tags: [Stats]
+      responses:
+        "200":
+          description: Total redirect count.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  redirectCount:
+                    type: integer
+                    format: int64
+components:
+  schemas:
+    RequestUrl:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+        alias:
+          type: string
+          nullable: true
+      required:
+        - url
+    RequestShortUrl:
+      type: object
+      properties:
+        url_id:
+          type: string
+          description: Base64-url encoded id of the stored short URL.
+        alias:
+          type: string
+          nullable: true
+      required:
+        - url_id
+    ResponseUrl:
+      type: object
+      properties:
+        shortUrl:
+          type: string
+        fullUrl:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        expiresAt:
+          type: string
+          format: date-time
+        requestCount:
+          type: integer
+      required:
+        - shortUrl
+        - fullUrl
+        - createdAt
+        - expiresAt
+        - requestCount
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+        error:
+          type: string
+        message:
+          type: string
+      required:
+        - status
+        - error
+        - message
+  responses:
+    BadRequestError:
+      description: 400 Bad Request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFoundError:
+      description: 404 Not Found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    GoneError:
+      description: 410 Gone.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
