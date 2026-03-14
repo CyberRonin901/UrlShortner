@@ -18,7 +18,7 @@ public class GlobalExceptionHandler {
     // 400 Bad Request
     @ExceptionHandler({
             AliasMismatchException.class,
-            InvalidInputLength.class,
+            InvalidInputLengthException.class,
             InvalidUrlIdException.class,
             ProhibitedDomainException.class,
             NullInputException.class

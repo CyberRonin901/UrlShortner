@@ -1,7 +1,7 @@
 package com.cyberronin.url_shortner.validator;
 
 import com.cyberronin.url_shortner.dto.RequestUrl;
-import com.cyberronin.url_shortner.exceptions.InvalidInputLength;
+import com.cyberronin.url_shortner.exceptions.InvalidInputLengthException;
 import com.cyberronin.url_shortner.exceptions.NullInputException;
 import com.cyberronin.url_shortner.exceptions.ProhibitedDomainException;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,7 +31,7 @@ public class RequestValidator {
             int aliasLength = requestUrl.alias().length();
 
             if (aliasLength > MAX_ALIAS_SIZE || aliasLength < MIN_ALIAS_SIZE)
-                throw new InvalidInputLength(requestUrl.alias().length(), MAX_ALIAS_SIZE, MIN_ALIAS_SIZE); // input too large
+                throw new InvalidInputLengthException(requestUrl.alias().length(), MAX_ALIAS_SIZE, MIN_ALIAS_SIZE); // input too large
 
         }
 
