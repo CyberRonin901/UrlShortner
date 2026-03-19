@@ -9,6 +9,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/stats")
+@CrossOrigin
 public class StatsController {
     private final UrlService urlService;
     private final StatsService statsService;
