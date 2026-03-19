@@ -36,6 +36,7 @@ public class GlobalExceptionHandler {
 //     Fallback for all other exceptions
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneralException(Exception ex) {
+        System.out.println(ex.toString());
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected Internal Server Error");
     }
 
