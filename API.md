@@ -3,7 +3,9 @@
 This document is a concise Markdown view of the HTTP API, derived from `API.docs`.
 Method-level Javadoc, `API.docs`, `API.yaml`, and this file were generated automatically by AI.
 
-Base URL (local): `http://localhost:8080`
+Base URL (local): `http://localhost:5000` for API requests.
+
+Note: returned short URLs are built using `app.base.url` (default `http://localhost:5000`), so the `url`/`shortUrl` fields may start with `:5000` unless `BASE_URL` is provided to the container environment.
 
 ---
 
@@ -30,7 +32,7 @@ Base URL (local): `http://localhost:8080`
 
 ```json
 {
-  "url": "http://localhost:8080/MTIzNDU/optional-alias"
+  "url": "http://localhost:5000/MTIzNDU/optional-alias"
 }
 ```
 
@@ -59,7 +61,7 @@ Base URL (local): `http://localhost:8080`
 
 ```json
 {
-  "shortUrl": "http://localhost:8080/MTIzNDU/optional-alias",
+  "shortUrl": "http://localhost:5000/MTIzNDU/optional-alias",
   "fullUrl": "https://example.com/some/path",
   "createdAt": "2026-03-13T12:34:56.000",
   "expiresAt": "2026-04-13T12:34:56.000",
@@ -203,7 +205,9 @@ All handled errors share a common shape:
 Status mappings:
 
 - `404 Not Found` — `UrlNotFoundException`
-- `400 Bad Request` — `AliasMismatchException`, `InvalidInputLength`, `InvalidUrlIdException`, `ProhibitedDomainException`, `NullInputException`
+- `400 Bad Request` — `AliasMismatchException`, `InvalidInputLengthException`, `InvalidUrlIdException`, `ProhibitedDomainException`, `NullInputException`
 - `410 Gone` — `UrlExpiredException`
 - `500 Internal Server Error` — any other unhandled exception; message becomes `Unexpected Internal Server Error`.
+
+Unmatched paths: the wildcard controller (`WildCardControlller`) catches any other routes and returns HTTP `400` with a plain-text body `Path not found`.
 

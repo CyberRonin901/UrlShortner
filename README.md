@@ -26,6 +26,7 @@ This project is a backend-only URL shortening service built with Spring Boot, JP
   - Expiry is set/refreshed to `now + 1 month` when creating a short URL and when redirecting.
   - Expired links return **410 Gone**.
 - **Cleanup job**: A scheduled task deletes expired URLs daily at midnight (server time).
+- **Unmatched paths**: A wildcard controller catches any other routes and returns **400** with message `Path not found`.
 
 ---
 
@@ -49,7 +50,7 @@ See `API.yaml` or `API.md`.
 - **`src/main/resources/`**
   - **`application.properties`**: Spring and app config
 - **`Dockerfile`**: container image for the app
-- **`dockercompose.yaml`**: main Docker Compose file (see note below)
+- **`docker-compose.yaml`**: main Docker Compose file
 - **`pom.xml`**: Maven build config
 
 ---
@@ -58,7 +59,8 @@ See `API.yaml` or `API.md`.
 
 Key application properties (see `src/main/resources/application.properties`):
 
-- **`app.base.url`**: base URL used when constructing short URLs (default `http://localhost:8080`)
+- `server.port=5000`: where the Spring Boot app listens.
+- **`app.base.url`**: base URL used when constructing short URLs (default `http://localhost:5000`)
 - **`app.url.alias.min.size`** / **`app.url.alias.max.size`**: alias size limits
 
 Database configuration is driven by:
@@ -82,7 +84,9 @@ Copy `sample.env` to `.env` and fill values:
 - `POSTGRES_USERNAME`
 - `POSTGRES_PASSWORD`
 - `POSTGRES_DB_NAME`
-- `BASE_URL` (optional; defaults to `http://localhost:8080`)
+- `BASE_URL` (optional; defaults to `http://localhost:5000`)
+
+Note: `BASE_URL` affects the base used inside returned short URLs (`app.base.url`). The app listens on port `5000`, so if you want returned links to point to `http://localhost:5000`, ensure `BASE_URL` is available to the container environment.
 
 ### 2) Build the app jar
 
@@ -98,15 +102,13 @@ From the project root:
 
 Use the main compose file.
 
-Important naming note: the repo contains `~docker-compose.yaml` which should be treated as the main compose. When referenced in docs, it is referred to as `dockercompose.yaml`.
-
 ```bash
-docker compose -f dockercompose.yaml -f dockercompose.dev.yaml up --build
+docker compose -f docker-compose.yaml up --build
 ```
 
 ### 4) Verify
 
-- API should be on `http://localhost:8080`
+- API should be on `http://localhost:5000`
 - Postgres runs inside Docker and is reachable by the app using `db:5432`
 
 ---
@@ -116,7 +118,7 @@ docker compose -f dockercompose.yaml -f dockercompose.dev.yaml up --build
 ### Shorten a URL
 
 ```bash
-curl -s -X POST "http://localhost:8080/api/v1/shortenUrl" \
+curl -s -X POST "http://localhost:5000/api/v1/shortenUrl" \
   -H "Content-Type: application/json" \
   -d '{"url":"https://example.com","alias":"ex"}'
 ```
@@ -124,7 +126,7 @@ curl -s -X POST "http://localhost:8080/api/v1/shortenUrl" \
 ### Fetch metadata
 
 ```bash
-curl -s -X POST "http://localhost:8080/api/v1/data" \
+curl -s -X POST "http://localhost:5000/api/v1/data" \
   -H "Content-Type: application/json" \
   -d '{"url_id":"<encoded_id>","alias":"ex"}'
 ```
@@ -133,14 +135,14 @@ curl -s -X POST "http://localhost:8080/api/v1/data" \
 
 Open in a browser:
 
-- `http://localhost:8080/<encoded_id>`
-- `http://localhost:8080/<encoded_id>/ex`
+- `http://localhost:5000/<encoded_id>`
+- `http://localhost:5000/<encoded_id>/ex`
 
 ### Stats
 
 ```bash
-curl -s "http://localhost:8080/api/v1/stats/totalRequestCount"
-curl -s "http://localhost:8080/api/v1/stats/redirectCount"
-curl -s "http://localhost:8080/api/v1/stats/requestCount?url_id=<encoded_id>&alias=ex"
+curl -s "http://localhost:5000/api/v1/stats/totalRequestCount"
+curl -s "http://localhost:5000/api/v1/stats/redirectCount"
+curl -s "http://localhost:5000/api/v1/stats/requestCount?url_id=<encoded_id>&alias=ex"
 ```
 

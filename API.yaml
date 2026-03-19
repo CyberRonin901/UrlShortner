@@ -6,9 +6,9 @@ info:
     Backend URL shortening service.
 
     - Method-level docs and this OpenAPI description were generated automatically by AI.
-    - Base URL is configurable via `app.base.url` (defaults to `http://localhost:8080`).
+    - Base URL is configurable via `app.base.url` (defaults to `http://localhost:5000`).
 servers:
-  - url: http://localhost:8080
+  - url: http://localhost:5000
 paths:
   /api/v1/shortenUrl:
     post:
