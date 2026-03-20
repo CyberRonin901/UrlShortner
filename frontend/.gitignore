@@ -8,3 +8,6 @@ dist-ssr/
 .env.local
 .env.*.local
 
+DEPLOYMENT.md
+deploy.sh
+tsconfig.tsbuildinfo
