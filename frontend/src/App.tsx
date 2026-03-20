@@ -30,6 +30,36 @@ function formatDateTime(input: string): string {
   return d.toLocaleString();
 }
 
+function LoadingSpinner({ size = 16 }: { size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      style={{ animation: 'spin 1s linear infinite' }}
+    >
+      <circle
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="4"
+        strokeLinecap="round"
+        strokeDasharray="31.416 31.416"
+        opacity="0.25"
+      />
+      <path
+        d="M12 2a10 10 0 0 1 10 10"
+        stroke="currentColor"
+        strokeWidth="4"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 function parseShortUrl(input: string): { urlId: string; alias: string | null } | null {
   const trimmed = input.trim();
   if (!trimmed) return null;
@@ -87,6 +117,7 @@ export default function AppNew() {
   const [shortenStatus, setShortenStatus] = useState<UiStatus>({ kind: "idle" });
   const [shortUrl, setShortUrl] = useState<string | null>(null);
   const [shortenCopyStatus, setShortenCopyStatus] = useState<UiStatus>({ kind: "idle" });
+  const [isShortening, setIsShortening] = useState(false);
 
   // Metadata
   const [metaShortUrlInput, setMetaShortUrlInput] = useState("");
@@ -138,6 +169,7 @@ export default function AppNew() {
     setShortenStatus({ kind: "idle" });
     setShortenCopyStatus({ kind: "idle" });
     setShortUrl(null);
+    setIsShortening(true);
 
     try {
       const res = await shortenUrl({
@@ -148,6 +180,8 @@ export default function AppNew() {
       setShortenStatus({ kind: "ok", message: "Short URL created." });
     } catch (e) {
       setShortenStatus({ kind: "err", message: errorToText(e) || "Request failed." });
+    } finally {
+      setIsShortening(false);
     }
   }
 
@@ -155,7 +189,27 @@ export default function AppNew() {
     if (!shortUrl) return;
     setShortenCopyStatus({ kind: "idle" });
     try {
-      await navigator.clipboard.writeText(shortUrl);
+      // Try modern clipboard API first
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(shortUrl);
+      } else {
+        // Fallback for older browsers or non-secure contexts
+        const textArea = document.createElement("textarea");
+        textArea.value = shortUrl;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        textArea.style.top = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        const successful = document.execCommand('copy');
+        document.body.removeChild(textArea);
+        
+        if (!successful) {
+          throw new Error("Copy command failed");
+        }
+      }
       setShortenCopyStatus({ kind: "ok", message: "Copied to clipboard." });
     } catch (e) {
       setShortenCopyStatus({ kind: "err", message: errorToText(e) || "Copy failed." });
@@ -260,8 +314,15 @@ export default function AppNew() {
                 </div>
                 <div className="button-wrapper">
                   <label className="input-label">&nbsp;</label>
-                  <button className="shorten-btn" disabled={!canShorten} onClick={onShorten}>
-                    Shorten
+                  <button className="shorten-btn" disabled={!canShorten || isShortening} onClick={onShorten}>
+                    {isShortening ? (
+                      <>
+                        <LoadingSpinner size={16} />
+                        Shortening...
+                      </>
+                    ) : (
+                      "Shorten"
+                    )}
                   </button>
                 </div>
               </div>

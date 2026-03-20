@@ -159,6 +159,13 @@ body {
   box-shadow: 0 2px 8px var(--shadow);
 }
 
+.theme-toggle-btn:active {
+  transform: scale(0.95);
+  box-shadow: 0 1px 4px var(--shadow);
+  transition: all 0.1s ease;
+  animation: flash-theme 0.3s ease-in-out;
+}
+
 .theme-toggle-btn:hover {
   transform: scale(1.1);
   box-shadow: 0 4px 12px var(--shadow-lg);
@@ -290,6 +297,57 @@ body {
   min-width: auto;
 }
 
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes flash-primary {
+  0% { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%); }
+  50% { background: linear-gradient(135deg, #8b9dc3 0%, #7d8db3 100%); }
+  100% { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%); }
+}
+
+@keyframes flash-secondary {
+  0% { background: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-hover) 100%); }
+  50% { background: linear-gradient(135deg, #6fc993 0%, #5fb583 100%); }
+  100% { background: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-hover) 100%); }
+}
+
+@keyframes flash-warning {
+  0% { background: linear-gradient(135deg, var(--warning) 0%, var(--warning-hover) 100%); }
+  50% { background: linear-gradient(135deg, #f8c471 0%, #f5b041 100%); }
+  100% { background: linear-gradient(135deg, var(--warning) 0%, var(--warning-hover) 100%); }
+}
+
+@keyframes flash-danger {
+  0% { background: linear-gradient(135deg, var(--danger) 0%, var(--danger-hover) 100%); }
+  50% { background: linear-gradient(135deg, #f8a5a5 0%, #f39c9c 100%); }
+  100% { background: linear-gradient(135deg, var(--danger) 0%, var(--danger-hover) 100%); }
+}
+
+@keyframes flash-accent {
+  0% { background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%); }
+  50% { background: linear-gradient(135deg, #b8a3d3 0%, #a894c3 100%); }
+  100% { background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%); }
+}
+
+@keyframes flash-theme {
+  0% { background: var(--card-bg); }
+  50% { background: rgba(102, 126, 234, 0.2); }
+  100% { background: var(--card-bg); }
+}
+
+.loading-button-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .input-label {
   display: block;
   margin-bottom: 8px;
@@ -347,11 +405,24 @@ body {
   box-shadow: 0 4px 12px var(--shadow);
   flex: 1;
   min-width: 120px;
+  position: relative;
+  overflow: hidden;
+}
+
+.shorten-btn:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 2px 8px var(--shadow);
+  transition: all 0.1s ease;
+  animation: flash-primary 0.3s ease-in-out;
 }
 
 .shorten-btn {
   background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
   color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .shorten-btn:hover:not(:disabled) {
@@ -359,8 +430,51 @@ body {
   box-shadow: 0 6px 20px var(--shadow-lg);
 }
 
+.copy-btn:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 2px 8px var(--shadow);
+  transition: all 0.1s ease;
+  animation: flash-secondary 0.3s ease-in-out;
+}
+
 .copy-btn {
   background: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-hover) 100%);
+  color: white;
+}
+
+.open-btn:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 2px 8px var(--shadow);
+  transition: all 0.1s ease;
+  animation: flash-warning 0.3s ease-in-out;
+}
+
+.open-btn {
+  background: linear-gradient(135deg, var(--warning) 0%, var(--warning-hover) 100%);
+  color: white;
+}
+
+.fetch-btn:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 2px 8px var(--shadow);
+  transition: all 0.1s ease;
+  animation: flash-accent 0.3s ease-in-out;
+}
+
+.fetch-btn {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+  color: white;
+}
+
+.delete-btn:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 2px 8px var(--shadow);
+  transition: all 0.1s ease;
+  animation: flash-danger 0.3s ease-in-out;
+}
+
+.delete-btn {
+  background: linear-gradient(135deg, var(--danger) 0%, var(--danger-hover) 100%);
   color: white;
 }
 
@@ -369,29 +483,14 @@ body {
   box-shadow: 0 6px 20px var(--shadow-lg);
 }
 
-.open-btn {
-  background: linear-gradient(135deg, var(--warning) 0%, var(--warning-hover) 100%);
-  color: white;
-}
-
 .open-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px var(--shadow-lg);
 }
 
-.fetch-btn {
-  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
-  color: white;
-}
-
 .fetch-btn:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px var(--shadow-lg);
-}
-
-.delete-btn {
-  background: linear-gradient(135deg, var(--danger) 0%, var(--danger-hover) 100%);
-  color: white;
 }
 
 .delete-btn:hover:not(:disabled) {
