@@ -77,9 +77,9 @@ function parseShortUrl(input: string): { urlId: string; alias: string | null } |
 
 export default function AppNew() {
   const [theme, setTheme] = useState<Theme>("dark");
-
   const [redirectCount, setRedirectCount] = useState<number | null>(null);
   const [statsStatus, setStatsStatus] = useState<UiStatus>({ kind: "idle" });
+
 
   // Shorten
   const [fullUrl, setFullUrl] = useState("");
@@ -124,13 +124,13 @@ export default function AppNew() {
       }
     }
 
-    // Stats update only on refresh/page load.
     loadStats();
 
     return () => {
       cancelled = true;
     };
   }, []);
+
 
   const canShorten = useMemo(() => fullUrl.trim().length > 0, [fullUrl]);
 
@@ -213,146 +213,221 @@ export default function AppNew() {
   }
 
   return (
-    <div className="container">
-      <div className="header">
-        <div>
-          <h1>URL Shortner</h1>
-        </div>
-
-        <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", justifyContent: "flex-end" }}>
-          <div className="badge" title="Total redirects since server start (tracked by AOP in memory)">
-            Total redirects:{" "}
-            <span style={{ fontFamily: "monospace" }}>
-              {redirectCount === null ? "..." : redirectCount}
-            </span>
+    <div className="app-container">
+      <div className="background-gradient"></div>
+      
+      <header className="app-header">
+        <div className="header-content">
+          <h1 className="app-title">ShortUrl</h1>
+          <div className="header-stats">
+            <div className="redirect-counter">
+              <span className="counter-label">Total Redirects:</span>
+              <span className="counter-value">
+                {redirectCount === null ? "..." : redirectCount.toLocaleString()}
+              </span>
+            </div>
+            <button className="theme-toggle-btn" onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}>
+              {theme === "dark" ? "☀️" : "🌙"}
+            </button>
           </div>
-
-          <button className="themeToggle" onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}>
-            {theme === "dark" ? "Switch to Light" : "Switch to Dark"}
-          </button>
         </div>
-      </div>
+      </header>
 
-      {statsStatus.kind !== "idle" && statsStatus.kind === "err" && (
-        <div className="status err">{statsStatus.message}</div>
-      )}
-
-      <div className="card" style={{ marginTop: 14 }}>
-        <h2>Shorten URL</h2>
-
-        <label>Full URL (required)</label>
-        <input value={fullUrl} onChange={(e) => setFullUrl(e.target.value)} placeholder="https://example.com/..." />
-
-        <label>Alias (optional)</label>
-        <input value={alias} onChange={(e) => setAlias(e.target.value)} placeholder="my-alias" />
-
-        <div className="row" style={{ marginTop: 12 }}>
-          <button className="primary" disabled={!canShorten} onClick={onShorten}>
-            Shorten
-          </button>
-        </div>
-
-        {shortenStatus.kind !== "idle" && (
-          <div className={`status ${shortenStatus.kind === "ok" ? "ok" : "err"}`}>{shortenStatus.message}</div>
-        )}
-
-        {shortUrl && (
-          <>
-            <label style={{ marginTop: 14 }}>Short URL</label>
-            <input value={shortUrl} readOnly />
-
-            <div className="row" style={{ marginTop: 12 }}>
-              <button className="primary" onClick={onCopyShortUrl}>
-                Copy URL
-              </button>
-              <button onClick={onOpenRedirect}>Open Redirect</button>
+      <main className="main-content">
+        <div className="hero-section">
+          <div className="url-shortener-card">
+            <h2 className="card-title">Shorten URL</h2>
+            
+            <div className="horizontal-input-group">
+              <div className="input-row">
+                <div className="input-wrapper">
+                  <label className="input-label">Full URL (required)</label>
+                  <input 
+                    className="url-input" 
+                    value={fullUrl} 
+                    onChange={(e) => setFullUrl(e.target.value)} 
+                    placeholder="https://example.com/..." 
+                  />
+                </div>
+                <div className="input-wrapper">
+                  <label className="input-label">Alias (optional)</label>
+                  <input 
+                    className="url-input" 
+                    value={alias} 
+                    onChange={(e) => setAlias(e.target.value)} 
+                    placeholder="my-alias" 
+                  />
+                </div>
+                <div className="button-wrapper">
+                  <label className="input-label">&nbsp;</label>
+                  <button className="shorten-btn" disabled={!canShorten} onClick={onShorten}>
+                    Shorten
+                  </button>
+                </div>
+              </div>
             </div>
 
-            {shortenCopyStatus.kind !== "idle" && (
-              <div className={`status ${shortenCopyStatus.kind === "ok" ? "ok" : "err"}`}>{shortenCopyStatus.message}</div>
+            {shortenStatus.kind !== "idle" && (
+              <div className={`status-message ${shortenStatus.kind === "ok" ? "success" : "error"}`}>
+                {shortenStatus.message}
+              </div>
             )}
-          </>
-        )}
-      </div>
 
-      <div className="grid" style={{ marginTop: 14 }}>
-        <div className="card">
-          <h2>Get Short URL Metadata</h2>
+            {shortUrl && (
+              <div className="result-section">
+                <div className="horizontal-result-group">
+                  <div className="result-input-wrapper">
+                    <label className="input-label">Short URL</label>
+                    <div className="result-input-container">
+                      <input className="url-input result-input" value={shortUrl} readOnly />
+                    </div>
+                  </div>
+                  <div className="result-buttons-wrapper">
+                    <label className="input-label">&nbsp;</label>
+                    <div className="result-buttons">
+                      <button className="copy-btn" onClick={onCopyShortUrl}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" fill="currentColor"/>
+                        </svg>
+                        Copy
+                      </button>
+                      <button className="open-btn" onClick={onOpenRedirect}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z" fill="currentColor"/>
+                        </svg>
+                        Open
+                      </button>
+                    </div>
+                  </div>
+                </div>
 
-          <label>Full short URL (required)</label>
-          <input
-            value={metaShortUrlInput}
-            onChange={(e) => setMetaShortUrlInput(e.target.value)}
-            placeholder="http://localhost:5000/{id} or http://localhost:5000/{id}/{alias}"
-          />
-
-          <div className="row" style={{ marginTop: 12 }}>
-            <button className="primary" disabled={!metaShortUrlInput.trim()} onClick={onGetMetadata}>
-              Fetch Metadata
-            </button>
+                {shortenCopyStatus.kind !== "idle" && (
+                  <div className={`status-message ${shortenCopyStatus.kind === "ok" ? "success" : "error"}`}>
+                    {shortenCopyStatus.message}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
-
-          {metaStatus.kind !== "idle" && (
-            <div className={`status ${metaStatus.kind === "ok" ? "ok" : "err"}`}>{metaStatus.message}</div>
-          )}
-
-          {metaResult && (
-            <div>
-              <div className="kv">
-                <div className="k">Short URL</div>
-                <div className="v" style={{ fontFamily: "monospace", wordBreak: "break-word" }}>{metaResult.shortUrl}</div>
-              </div>
-              <div className="kv">
-                <div className="k">Full URL</div>
-                <div className="v" style={{ wordBreak: "break-word" }}>{metaResult.fullUrl}</div>
-              </div>
-              <div className="kv">
-                <div className="k">Created At</div>
-                <div className="v">{formatDateTime(metaResult.createdAt)}</div>
-              </div>
-              <div className="kv">
-                <div className="k">Expires At</div>
-                <div className="v">{formatDateTime(metaResult.expiresAt)}</div>
-              </div>
-              <div className="kv">
-                <div className="k">Request Count</div>
-                <div className="v" style={{ fontFamily: "monospace" }}>{metaResult.requestCount}</div>
-              </div>
-            </div>
-          )}
         </div>
 
-        <div className="card">
-          <h2>Delete Short URL</h2>
+        <div className="features-grid">
+          <div className="feature-card">
+            <h3 className="feature-title">Get Short URL Metadata</h3>
+            
+            <div className="input-group">
+              <label className="input-label">Full short URL (required)</label>
+              <input
+                className="url-input"
+                value={metaShortUrlInput}
+                onChange={(e) => setMetaShortUrlInput(e.target.value)}
+                placeholder="http://localhost:5000/{id} or http://localhost:5000/{id}/{alias}"
+              />
+            </div>
 
-          <label>Full short URL (required)</label>
-          <input
-            value={deleteShortUrlInput}
-            onChange={(e) => setDeleteShortUrlInput(e.target.value)}
-            placeholder="http://localhost:5000/{id} or http://localhost:5000/{id}/{alias}"
-          />
+            <div className="action-buttons">
+              <button className="fetch-btn" disabled={!metaShortUrlInput.trim()} onClick={onGetMetadata}>
+                Fetch Metadata
+              </button>
+            </div>
 
-          <div className="row" style={{ marginTop: 12 }}>
-            <button
-              className="danger"
-              disabled={!deleteShortUrlInput.trim()}
-              onClick={onDelete}
+            {metaStatus.kind !== "idle" && (
+              <div className={`status-message ${metaStatus.kind === "ok" ? "success" : "error"}`}>
+                {metaStatus.message}
+              </div>
+            )}
+
+            {metaResult && (
+              <div className="metadata-display">
+                <div className="metadata-item">
+                  <span className="metadata-key">Short URL:</span>
+                  <span className="metadata-value">{metaResult.shortUrl}</span>
+                </div>
+                <div className="metadata-item">
+                  <span className="metadata-key">Full URL:</span>
+                  <span className="metadata-value">{metaResult.fullUrl}</span>
+                </div>
+                <div className="metadata-item">
+                  <span className="metadata-key">Created At:</span>
+                  <span className="metadata-value">{formatDateTime(metaResult.createdAt)}</span>
+                </div>
+                <div className="metadata-item">
+                  <span className="metadata-key">Expires At:</span>
+                  <span className="metadata-value">{formatDateTime(metaResult.expiresAt)}</span>
+                </div>
+                <div className="metadata-item">
+                  <span className="metadata-key">Request Count:</span>
+                  <span className="metadata-value">{metaResult.requestCount}</span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="feature-card">
+            <h3 className="feature-title">Delete Short URL</h3>
+            
+            <div className="warning-message">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" fill="currentColor"/>
+              </svg>
+              <span>Warning: All shared URLs will become permanently inaccessible and cannot be recovered.</span>
+            </div>
+            
+            <div className="input-group">
+              <label className="input-label">Full short URL (required)</label>
+              <input
+                className="url-input"
+                value={deleteShortUrlInput}
+                onChange={(e) => setDeleteShortUrlInput(e.target.value)}
+                placeholder="http://localhost:5000/{id} or http://localhost:5000/{id}/{alias}"
+              />
+            </div>
+
+            <div className="action-buttons">
+              <button
+                className="delete-btn"
+                disabled={!deleteShortUrlInput.trim()}
+                onClick={onDelete}
+              >
+                Delete
+              </button>
+            </div>
+
+            {deleteStatus.kind !== "idle" && (
+              <div className={`status-message ${deleteStatus.kind === "ok" ? "success" : "error"}`}>
+                {deleteStatus.message}
+              </div>
+            )}
+
+            {deleteOk === true && (
+              <div className="status-message success">
+                Deleted successfully.
+              </div>
+            )}
+          </div>
+        </div>
+      </main>
+
+      <footer className="app-footer">
+        <div className="footer-container">
+          <div className="footer-brand">
+            <h3 className="footer-title">ShortUrl</h3>
+          </div>
+          <div className="footer-links">
+            <a 
+              href="https://github.com/CyberRonin901/UrlShortner" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="github-button"
             >
-              Delete
-            </button>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+              </svg>
+              GitHub Repository
+            </a>
           </div>
-
-          {deleteStatus.kind !== "idle" && (
-            <div className={`status ${deleteStatus.kind === "ok" ? "ok" : "err"}`}>{deleteStatus.message}</div>
-          )}
-
-          {deleteOk === true && (
-            <div className="status ok" style={{ marginTop: 12 }}>
-              Deleted successfully.
-            </div>
-          )}
         </div>
-      </div>
+      </footer>
     </div>
   );
 }
