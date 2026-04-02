@@ -10,7 +10,7 @@ This project is a backend-only URL shortening service built with Spring Boot, JP
 
 - **AOP usage**: An Aspect (`StatisticsAspect`) wraps controller methods to increment in-memory counters for total requests and successful redirects.
 - **Encoding approach**: Each database id is converted to a string and then encoded using a URL-safe Base64 variant without padding; this encoded id is used in the path segment of the short URL (no additional security layer is applied).
-- **Automatic docs**: Method-level docs were generated automatically by AI and inserted as Javadoc above methods in the codebase. API docs and this README were also generated automatically by AI.
+- **Automatic docs**: Method-level docs were generated automatically by AI and inserted as Javadoc above methods in the codebase.
 
 ---
 
