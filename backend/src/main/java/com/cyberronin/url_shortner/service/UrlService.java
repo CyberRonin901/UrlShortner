@@ -6,6 +6,8 @@ import com.cyberronin.url_shortner.exceptions.UrlExpiredException;
 import com.cyberronin.url_shortner.exceptions.UrlNotFoundException;
 import com.cyberronin.url_shortner.model.ShortUrl;
 import com.cyberronin.url_shortner.repo.UrlRepo;
+import jakarta.annotation.Nonnull;
+import org.antlr.v4.runtime.misc.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -37,12 +39,13 @@ public class UrlService {
      * @param expiryDate expiration timestamp to validate
      * @throws UrlExpiredException if the timestamp is in the past
      */
-    private void validateExpiryDate(LocalDateTime expiryDate)
+    private boolean validateExpiryDate(@Nonnull LocalDateTime expiryDate)
     {
         LocalDateTime curr_Time = LocalDateTime.now();
         if (curr_Time.isAfter(expiryDate))
             throw new UrlExpiredException(expiryDate);
         // url is expired and cannot be used as it may be deleted during process
+        return true;
     }
 
     /**
